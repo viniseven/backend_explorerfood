@@ -63,12 +63,12 @@ class UsersController {
       if(checkEqualsPassword){
         throw new AppError('A senha antiga não pode ser igual a atual')
       }
+
+      user.password = await bcrypt.hash(newPassword, 8)
     }
 
-    const password = await bcrypt.hash(newPassword, 8)
-
     await database.run(`UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME("now")
-    WHERE id = ?`, [user.name, user.email, password, id])
+    WHERE id = ?`, [user.name, user.email, user.password, id])
 
     return response.json('Dados alterados com sucesso')
 
