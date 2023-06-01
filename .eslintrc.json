@@ -15,6 +15,7 @@
         "class-methods-use-this": 0,
         "no-undef":"off",
         "no-console": "off",
-        "no-unused-vars": "off"
+        "no-unused-vars": "off",
+        "eslint-disable camelcase": true
     }
 }
