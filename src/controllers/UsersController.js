@@ -1,77 +1,91 @@
 const bcrypt = require('bcryptjs')
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/AppError')
 
 const sqlConnection = require('../database/sqlite')
 
 class UsersController {
   async create(request, response) {
-    const { name, email, password, isAdmin } = request.body;
-    
-    if(!name || !email || !password){
+    const { name, email, password, isAdmin } = request.body
+
+    if (!name || !email || !password) {
       throw new AppError('Prencha todos os campos')
     }
 
-    const database = await sqlConnection();
+    const database = await sqlConnection()
 
-    const checkUserExist = await database.get('SELECT * FROM users WHERE email = (?)', [email])
+    const checkUserExist = await database.get(
+      'SELECT * FROM users WHERE email = (?)',
+      [email]
+    )
 
-    if(checkUserExist){
+    if (checkUserExist) {
       throw new AppError('Este email já está em uso')
     }
 
     const hashedPassword = await bcrypt.hash(password, 8)
 
-    await database.run('INSERT INTO users (name, email, password, isAdmin) VALUES (?,?,?,?)',[name, email, hashedPassword, isAdmin])
- 
+    await database.run(
+      'INSERT INTO users (name, email, password, isAdmin) VALUES (?,?,?,?)',
+      [name, email, hashedPassword, isAdmin]
+    )
+
     return response.status(201).json('Usuário cadastrado com sucesso')
   }
 
   async update(request, response) {
-    const { id } = request.params
-    const { name, email, newPassword, oldPassword } = request.body
+    const { name, email, password, old_password } = request.body
+    const user_id = request.user.id
 
-    const database = await sqlConnection();
+    const database = await sqliteConnection()
 
-    const user = await database.get('SELECT * FROM users WHERE id = (?)', [id])
+    const user = await database.get('SELECT * FROM users WHERE id = (?)', [
+      user_id
+    ])
 
-    if(!user){
-      throw new AppError('Usuário não encontrado')
+    if (!user) {
+      throw new AppError('Usuário não existe')
     }
 
-    const userWithUpdateEmail = await database.get('SELECT * FROM users WHERE email = (?)', [email])
+    const userWithUpdateEmail = await database.get(
+      'SELECT * FROM users WHERE email = (?)',
+      [email]
+    )
 
-    if(userWithUpdateEmail && userWithUpdateEmail.id !== id){
+    if (userWithUpdateEmail && userWithUpdateEmail.id !== user.id) {
       throw new AppError('Este email já está em uso')
     }
 
     user.name = name ?? user.name
     user.email = email ?? user.email
 
-    if(newPassword && !oldPassword){
+    if (password && !old_password) {
       throw new AppError('Por favor, insira a senha antiga')
     }
 
-    if(newPassword && oldPassword){
-      const checkOldPassword = await bcrypt.compare(oldPassword, user.password)
+    if (password && oldPassword) {
+      const checkOldPassword = await compare(old_password, user.password)
 
-      if(!checkOldPassword){
+      if (!checkOldPassword) {
         throw new AppError('A senha antiga não confere')
       }
 
-      const checkEqualsPassword = await bcrypt.compare(newPassword, user.password)
+      const checkEqualPassword = await compare(password, user.password)
 
-      if(checkEqualsPassword){
-        throw new AppError('A senha antiga não pode ser igual a atual')
+      if (checkEqualPassword) {
+        throw new AppError('A nova senha não pode ser igual a senha atual')
       }
 
-      user.password = await bcrypt.hash(newPassword, 8)
+      user.password = await hash(password, 8)
     }
 
-    await database.run(`UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME("now")
-    WHERE id = ?`, [user.name, user.email, user.password, id])
+    await database.run(
+      `UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME ('now')  WHERE id = ?`,
+      [user.name, user.email, user.password, user_id]
+    )
 
-    return response.json('Dados alterados com sucesso')
-
+    return response
+      .status(200)
+      .json({ message: 'Dados atualizados com sucesso' })
   }
 }
 
