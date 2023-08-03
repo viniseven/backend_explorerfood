@@ -1,7 +1,6 @@
-const { hash, compare } = require('bcryptjs')
 const AppError = require('../utils/AppError')
-
 const sqlConnection = require('../database/sqlite')
+const { hash, compare } = require('bcryptjs')
 
 class UsersController {
   async create(request, response) {
@@ -22,7 +21,7 @@ class UsersController {
       throw new AppError('Este email já está em uso')
     }
 
-    const hashedPassword = await bcrypt.hash(password, 8)
+    const hashedPassword = await hash(password, 8)
 
     await database.run(
       'INSERT INTO users (name, email, password, isAdmin) VALUES (?,?,?,?)',
@@ -31,6 +30,7 @@ class UsersController {
 
     return response.status(201).json('Usuário cadastrado com sucesso')
   }
+
   async update(request, response) {
     const { name, email, password, oldPassword } = request.body
     const user_id = request.user.id
