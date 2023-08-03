@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs')
+const { hash, compare } = require('bcryptjs')
 const AppError = require('../utils/AppError')
 
 const sqlConnection = require('../database/sqlite')
@@ -31,12 +31,11 @@ class UsersController {
 
     return response.status(201).json('Usuário cadastrado com sucesso')
   }
-
   async update(request, response) {
-    const { name, email, password, old_password } = request.body
+    const { name, email, password, oldPassword } = request.body
     const user_id = request.user.id
 
-    const database = await sqliteConnection()
+    const database = await sqlConnection()
 
     const user = await database.get('SELECT * FROM users WHERE id = (?)', [
       user_id
@@ -58,12 +57,12 @@ class UsersController {
     user.name = name ?? user.name
     user.email = email ?? user.email
 
-    if (password && !old_password) {
+    if (password && !oldPassword) {
       throw new AppError('Por favor, insira a senha antiga')
     }
 
     if (password && oldPassword) {
-      const checkOldPassword = await compare(old_password, user.password)
+      const checkOldPassword = await compare(oldPassword, user.password)
 
       if (!checkOldPassword) {
         throw new AppError('A senha antiga não confere')
@@ -79,7 +78,7 @@ class UsersController {
     }
 
     await database.run(
-      `UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME ('now')  WHERE id = ?`,
+      `UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME('now')  WHERE id = ?`,
       [user.name, user.email, user.password, user_id]
     )
 
