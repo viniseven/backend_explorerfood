@@ -7,8 +7,6 @@ class DishesController {
     const user_id = request.user.id
     const { name, category, price, description, ingredients } = request.body
 
-    console.log(name)
-
     const disheImage = request.file.filename
 
     const diskStorage = new DiskStorage()
