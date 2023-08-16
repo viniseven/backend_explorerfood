@@ -4,7 +4,7 @@ const { hash, compare } = require('bcryptjs')
 
 class UsersController {
   async create(request, response) {
-    const { name, email, password, isAdmin } = request.body
+    const { name, email, password } = request.body
 
     if (!name || !email || !password) {
       throw new AppError('Prencha todos os campos')
@@ -24,8 +24,8 @@ class UsersController {
     const hashedPassword = await hash(password, 8)
 
     await database.run(
-      'INSERT INTO users (name, email, password, isAdmin) VALUES (?,?,?,?)',
-      [name, email, hashedPassword, isAdmin]
+      'INSERT INTO users (name, email, password ) VALUES (?,?,?)',
+      [name, email, hashedPassword]
     )
 
     return response.status(201).json('Usuário cadastrado com sucesso')
