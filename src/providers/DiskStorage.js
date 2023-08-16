@@ -18,7 +18,7 @@ class DiskStorage {
     try {
       await fs.promises.stat(filePath)
     } catch {
-      return response.json('Error')
+      return
     }
 
     await fs.promises.unlink(filePath)

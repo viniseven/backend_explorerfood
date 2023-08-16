@@ -7,6 +7,12 @@ class DishesController {
     const user_id = request.user.id
     const { name, category, price, description, ingredients } = request.body
 
+    const existNameDishe = await knex('dishes').where({ name }).first()
+
+    if (existNameDishe) {
+      throw new AppError('Já existe um prato cadastrado com esse nome')
+    }
+
     const disheImage = request.file.filename
 
     const diskStorage = new DiskStorage()
@@ -36,7 +42,8 @@ class DishesController {
 
   async update(request, response) {
     const { id } = request.params
-    const { name, category, ingredients, price, description } = request.body
+    const { name, category, price, description, ingredients } = request.body
+    const disheImage = request.file.filename
 
     const dishe = await knex('dishes').where({ id }).first()
 
@@ -44,27 +51,39 @@ class DishesController {
       throw new AppError('Este prato não existe')
     }
 
+    const diskStorage = new DiskStorage()
+
+    if (disheImage) {
+      await diskStorage.deleteFile(dishe.img_dishe)
+    }
+    const filename = await diskStorage.saveFile(disheImage)
+
     dishe.name = name ?? dishe.name
     dishe.category = category ?? dishe.category
     dishe.price = price ?? dishe.price
     dishe.description = description ?? dishe.description
+    dishe.img_dishe = filename ?? dishe.img_dishe
 
     await knex('dishes').where({ id }).update({
       name: dishe.name,
+      img_dishe: filename,
       category: dishe.category,
       price: dishe.price,
       description: dishe.description
     })
 
-    const ingredientsUpdate = ingredients.map((ingredient) => {
-      return {
-        ingredient
-      }
-    })
+    if (ingredients) {
+      const ingredientsUpdate = ingredients.map((ingredient) => {
+        return {
+          ingredient,
+          dishe_id: id
+        }
+      })
 
-    await knex('ingredients')
-      .where({ dishe_id: id })
-      .update({ ingredient: ingredientsUpdate })
+      await knex('ingredients').where({ dishe_id: id }).delete()
+
+      await knex('ingredients').insert(ingredientsUpdate)
+    }
 
     return response.json('Prato atualizado com sucesso')
   }
