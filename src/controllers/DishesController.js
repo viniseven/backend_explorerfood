@@ -5,7 +5,10 @@ const DiskStorage = require('../providers/DiskStorage')
 class DishesController {
   async create(request, response) {
     const user_id = request.user.id
-    const { name, category, price, description, ingredients } = request.body
+    const data = request.body.data
+    const { name, category, price, description, ingredients } = JSON.parse(data)
+
+    const img = request.file.filename
 
     const existNameDishe = await knex('dishes').where({ name }).first()
 
@@ -13,11 +16,9 @@ class DishesController {
       throw new AppError('Já existe um prato cadastrado com esse nome')
     }
 
-    const disheImage = request.file.filename
-
     const diskStorage = new DiskStorage()
 
-    const filename = await diskStorage.saveFile(disheImage)
+    const filename = await diskStorage.saveFile(img)
 
     const [dishe_id] = await knex('dishes').insert({
       user_id,
@@ -44,6 +45,7 @@ class DishesController {
     const { id } = request.params
     const { name, category, price, description, ingredients } = request.body
     const disheImage = request.file.filename
+    const diskStorage = new DiskStorage()
 
     const dishe = await knex('dishes').where({ id }).first()
 
@@ -51,11 +53,10 @@ class DishesController {
       throw new AppError('Este prato não existe')
     }
 
-    const diskStorage = new DiskStorage()
-
-    if (disheImage) {
+    if (dishe.img_dishe) {
       await diskStorage.deleteFile(dishe.img_dishe)
     }
+
     const filename = await diskStorage.saveFile(disheImage)
 
     dishe.name = name ?? dishe.name
@@ -121,6 +122,7 @@ class DishesController {
         .select([
           'dishes.id',
           'dishes.name',
+          'dishes.img_dishe',
           'dishes.category',
           'dishes.price',
           'dishes.description'
