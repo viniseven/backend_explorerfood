@@ -6,6 +6,7 @@ class DishesController {
   async create(request, response) {
     const user_id = request.user.id
     const data = request.body.data
+
     const { name, category, price, description, ingredients } = JSON.parse(data)
 
     const img = request.file.filename
@@ -111,12 +112,12 @@ class DishesController {
   }
 
   async index(request, response) {
-    const { name, ingredients } = request.query
+    const { name, ingredient } = request.query
 
     let dishes
 
-    if (ingredients) {
-      const filterIngredients = ingredients.split(',').map((tag) => tag.trim())
+    if (ingredient) {
+      const filterIngredients = ingredient.split(',').map(tag => tag.trim());
 
       dishes = await knex('ingredients')
         .select([
@@ -134,6 +135,8 @@ class DishesController {
       dishes = await knex('dishes').whereLike('name', `%${name}%`)
     }
 
+    console.log(dishes)
+
     const userIngredients = await knex('ingredients')
     const disheWithIngredients = dishes.map((dishe) => {
       const disheFromIngredients = userIngredients.filter(
@@ -145,7 +148,6 @@ class DishesController {
         ingredients: disheFromIngredients
       }
     })
-
     return response.json(disheWithIngredients)
   }
 }
