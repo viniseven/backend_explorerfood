@@ -45,8 +45,13 @@ class DishesController {
 
   async update(request, response) {
     const { id } = request.params;
-    const { name, category, price, description, ingredients } = request.body;
-    const disheImage = request.file.filename;
+    const data = request.body.data;
+    const { name, category, price, description, ingredients } =
+      JSON.parse(data);
+    const img = request.file.filename;
+
+    console.log(data);
+
     const diskStorage = new DiskStorage();
 
     const dishe = await knex('dishes').where({ id }).first();
@@ -59,7 +64,7 @@ class DishesController {
       await diskStorage.deleteFile(dishe.img_dishe);
     }
 
-    const filename = await diskStorage.saveFile(disheImage);
+    const filename = await diskStorage.saveFile(img);
 
     dishe.name = name ?? dishe.name;
     dishe.category = category ?? dishe.category;
