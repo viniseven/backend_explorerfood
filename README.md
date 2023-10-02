@@ -3,11 +3,11 @@
 Aplicação de um cardápio digital para um restaurante, para realização de pedidos e visualização detalhada de todos os pratos.
 
 
-
+<div align="center">
 
 ![Logo](https://i.imgur.com/eUa2vnf.png[/img])
 
-
+</div
 ## Funcionalidades - Admin
 
 - Cadastrar Pratos
