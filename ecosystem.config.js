@@ -1,8 +1,9 @@
 module.exports = {
   apps: [
     {
-      name: 'app1',
+      name: 'foodexplorer',
       script: './src/server.js',
+      instances: 'max',
       env_production: {
         NODE_ENV: 'production'
       },
