@@ -9,6 +9,8 @@ Aplicação de um cardápio digital para um restaurante, para realização de pe
 
 </div>
 
+### Link Deploy: https://viniexplorerfood.netlify.app
+
 ## Funcionalidades - Admin
 
 - Cadastrar Pratos
