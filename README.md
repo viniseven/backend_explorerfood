@@ -45,10 +45,11 @@ Agora inicie o servidor Back-End
 ```bash
   npm start
 ```
-
-
-
-    
+## Usuário Admin
+```bash
+  email: admin@gmail.com
+  password: admin123
+```
 ## Autores
 
 - [viniseven](https://www.github.com/viniseven)
