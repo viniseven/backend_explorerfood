@@ -7,7 +7,7 @@ Aplicação de um cardápio digital para um restaurante, para realização de pe
 
 ![Logo](https://i.imgur.com/eUa2vnf.png[/img])
 
-<div/>
+</div>
 
 ## Funcionalidades - Admin
 
