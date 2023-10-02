@@ -1,6 +1,7 @@
 const AppError = require('../utils/AppError');
 const sqlConnection = require('../database/sqlite');
 const { hash, compare } = require('bcryptjs');
+const knex = require('../database/knex');
 
 class UsersController {
   async create(request, response) {

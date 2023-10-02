@@ -10,6 +10,8 @@ class DishesController {
     const { name, category, price, description, ingredients } =
       JSON.parse(data);
 
+    let priceProduct = parseFloat(price);
+
     const img = request.file.filename;
 
     const existNameDishe = await knex('dishes').where({ name }).first();
@@ -27,7 +29,7 @@ class DishesController {
       name,
       img_dishe: filename,
       category,
-      price,
+      price: priceProduct,
       description
     });
 
@@ -48,9 +50,8 @@ class DishesController {
     const data = request.body.data;
     const { name, category, price, description, ingredients } =
       JSON.parse(data);
-    const img = request.file.filename;
 
-    console.log(data);
+    const img = request.file.filename;
 
     const diskStorage = new DiskStorage();
 
@@ -67,14 +68,14 @@ class DishesController {
     const filename = await diskStorage.saveFile(img);
 
     dishe.name = name ?? dishe.name;
+    dishe.img_dishe = filename ?? dishe.img_dishe;
     dishe.category = category ?? dishe.category;
     dishe.price = price ?? dishe.price;
     dishe.description = description ?? dishe.description;
-    dishe.img_dishe = filename ?? dishe.img_dishe;
 
     await knex('dishes').where({ id }).update({
       name: dishe.name,
-      img_dishe: filename,
+      img_dishe: dishe.img_dishe,
       category: dishe.category,
       price: dishe.price,
       description: dishe.description
@@ -137,8 +138,6 @@ class DishesController {
     } else {
       dishes = await knex('dishes').whereLike('name', `%${name}%`);
     }
-
-    console.log(dishes);
 
     const userIngredients = await knex('ingredients');
     const disheWithIngredients = dishes.map((dishe) => {
